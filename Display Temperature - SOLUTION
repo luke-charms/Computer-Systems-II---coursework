@@ -1,1 +1,35 @@
+from picographics import PicoGraphics, DISPLAY_PICO_DISPLAY, PEN_P4
+import machine
+import time
 
+sensor_temp = machine.ADC(4)
+conversion_factor = 3.3 / (65535)
+
+display = PicoGraphics(display=DISPLAY_PICO_DISPLAY, pen_type=PEN_P4, rotate=0)
+
+display.set_backlight(0.5)
+display.set_font("bitmap8")
+
+WHITE = display.create_pen(255, 255, 255)
+BLACK = display.create_pen(0, 0, 0)
+
+def clear():
+    display.set_pen(BLACK)
+    display.clear()
+    display.update()
+
+def displayTemperature():
+    reading = sensor_temp.read_u16() * conversion_factor
+    temperature = 27 - (reading - 0.706)/0.001721
+    return ("The temperature is: " + str(round(temperature,1)))
+
+clear()
+
+while True:
+    output = displayTemperature()
+    display.set_pen(WHITE)
+    display.text(output, 10, 10, 240, 4)
+    display.update()
+    time.sleep(1)
+    clear()
+    
